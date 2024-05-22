@@ -1,9 +1,11 @@
 package org.hegazy.reflection.orm;
 
-public interface EntityManager <T> {
+import java.sql.SQLException;
 
-     static  <T>  EntityManager<T>   of(Class<T>clss){
+public abstract class EntityManager <T> {
+
+     public static  <T>  EntityManager<T>   of(Class<T> clss){
        return new EntityManagerImpl();
    }
-    void persist(T t);
+   public abstract void persist(T t) throws SQLException, IllegalAccessException;
 }
