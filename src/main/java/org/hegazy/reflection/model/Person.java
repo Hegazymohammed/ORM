@@ -1,7 +1,7 @@
 package org.hegazy.reflection.model;
 
 public class Person {
-     @PrimaryKey
+     @Id
     private long id;
      @Column
     private String name;

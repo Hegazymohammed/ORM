@@ -1,7 +1,7 @@
 package org.hegazy.reflection.utils;
 
 import org.hegazy.reflection.model.Column;
-import org.hegazy.reflection.model.PrimaryKey;
+import org.hegazy.reflection.model.Id;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class MetaModel {
      public PrimaryKeyField getPrimaryKey(){
         Field[]fields= clss.getDeclaredFields();
         for(Field field:fields){
-            PrimaryKey primaryKey=field.getAnnotation(PrimaryKey.class);
+            Id primaryKey=field.getAnnotation(Id.class);
             if(primaryKey!=null)
                     return new PrimaryKeyField(field);
         }
@@ -43,12 +43,29 @@ public class MetaModel {
      }
     public String buildInsertRequest() {
         //insert into person(id,name,age)values(?,?,?)
+
+        String names=buildColumnNames();
+        String questionMarks=buildQuestionMarkElements();
+        return "insert into "+clss.getSimpleName()+" ( "+names+" ) values ( "+questionMarks+") ;";
+    }
+
+    public String buildSeletRequest() {
+         //select id,name,age from id= ?
+        String columns=buildColumnNames();
+        return "select "+columns+" from "+this.clss.getSimpleName()+
+                "where "+getPrimaryKey().getName()+" ?";
+    }
+
+    private String buildColumnNames(){
         String primaryKey=getPrimaryKey().getName();
         List<String>columnNames=getColumnName().stream().map(column->column.getField().getName()).collect(Collectors.toList());
         columnNames.add(0,primaryKey);
         String names=String.join(", ",columnNames);
+        return names;
+    }
 
-        String questionMarks= IntStream.range(0,columnNames.size()).mapToObj(value -> "?").collect(Collectors.joining(", "));
-        return "insert into "+clss.getSimpleName()+" ( "+names+" ) values ( "+questionMarks+") ;";
+    private String buildQuestionMarkElements(){
+       String NQuestionMarks= IntStream.range(0,getColumnName().size()+1).mapToObj(value -> "?").collect(Collectors.joining(", "));
+       return NQuestionMarks;
     }
 }
